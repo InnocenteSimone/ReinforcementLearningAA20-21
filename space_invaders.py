@@ -7,8 +7,9 @@ Ogni ambiente fornisce un action_space e un observation_space, questi attributi 
 e descrivono il formato delle azioni e delle osservazioni valide
 """
 
-#print(env.action_space)         # Discrete(6)
-#print(env.observation_space)    # Box(0,255,(210,160,3),uint80)
+print("Action Space {}".format(env.action_space))   # Discrete(6)
+print("State Space {}".format(env.observation_space)) # Box(0,255,(210,160,3),uint80)
+
 
 """
 Lo spazio discreto fornisce dei numeri non negativi che andranno a rappresentare le azioni disponibili.
@@ -26,7 +27,7 @@ In this environment, the observation is an RGB image of the screen, which is an 
 
 print(env.unwrapped.get_action_meanings())  #['NOOP', 'FIRE', 'RIGHT', 'LEFT', 'RIGHTFIRE', 'LEFTFIRE']
 
-episodes = 5    #Numero di giocate
+episodes = 5  #Numero di giocate
 for episode in range(1,episodes+1):
     state = env.reset()     #Reset dell'ambiente
     done = False
@@ -35,6 +36,14 @@ for episode in range(1,episodes+1):
     while not done:
         env.render()
         action = env.action_space.sample()
+        
+        """
+        La funzione step ritorna:
+            1)observation: un oggetto specifico dell'ambiente che rappresenta l'osservazione dell'ambiente
+            2)reward: la reward ottenuta eseguendo l'azione
+            3)done: se è il momento di risettare con reset l'ambiente
+            4)info: informazioni utili per il debuggin
+        """
         n_state,reward,done,info = env.step(action)
         score+=reward
     print("Episode:{} Score:{}".format(episode,score))
