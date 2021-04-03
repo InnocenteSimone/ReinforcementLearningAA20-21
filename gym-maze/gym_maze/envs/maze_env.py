@@ -37,16 +37,17 @@ class MazeEnv(gym.Env):
         self.__init__()
 
     def step(self, action):
-        current_loc = self.agent_loc
+        current_loc = self.agent_loc    #Old position
         if(action == Action.UP.value):
-            self.agent_loc = (self.agent_loc[0]+1,self.agent_loc[1])
-        elif (action == Action.DOWN.value):
             self.agent_loc = (self.agent_loc[0]-1,self.agent_loc[1])
+        elif (action == Action.DOWN.value):
+            self.agent_loc = (self.agent_loc[0]+1,self.agent_loc[1])
         elif (action == Action.LEFT.value):
             self.agent_loc = (self.agent_loc[0],self.agent_loc[1]-1)
         elif (action == Action.RIGHT.value):
             self.agent_loc = (self.agent_loc[0],self.agent_loc[1]+1)
-
+        
+  
 
         reward = 0
         done = False
@@ -57,18 +58,58 @@ class MazeEnv(gym.Env):
             self.agent_loc = current_loc
 
         if self.maze[self.agent_loc[0]][self.agent_loc[1]] == 'E':
-            reward = 1  
+            reward = 1
             done = True
 
         
-        moveAgent(current_loc,self.agent_loc)
+        self.moveAgent(current_loc,action)
+
 
         return self.agent_loc, reward, done, info
 
-    def moveAgent(currentPos,newPos):
-        if(currentPos!=newPos):
-            pass
-            #self.maze[currentPos()[0]][currentPos()]
+    def moveAgent(self,oldLoc,action):
+        if(oldLoc!=self.agent_loc):
+            copy = self.maze[self.agent_loc[0]]
+            stringList = list(copy)
+            index = copy.find("S")
+            if(action == Action.RIGHT.value):
+                index += 1
+                stringList[index-1] = ' '
+                stringList[index] = "S"
+                copy = ''.join(stringList)
+                self.maze[self.agent_loc[0]] = copy
+            
+            if(action == Action.LEFT.value):
+                index -= 1
+                stringList[index+1] = ' '
+                stringList[index] = "S"
+                copy = ''.join(stringList)
+                self.maze[self.agent_loc[0]] = copy
+
+            if(action == Action.UP.value):
+                copyArray = [self.maze[oldLoc[0]-1],self.maze[oldLoc[0]],self.maze[oldLoc[0]+1]]
+                index = copyArray[1].find("S")
+                stringListArray = [list(copyArray[0]),list(copyArray[1])]
+                stringListArray[0][index] = 'S'
+                stringListArray[1][index] = ' '
+                copyArray[0] = ''.join(stringListArray[0])
+                copyArray[1] = ''.join(stringListArray[1])
+                self.maze[self.agent_loc[0]] = copyArray[0]
+                self.maze[self.agent_loc[0]+1] = copyArray[1]
+                
+            if(action == Action.DOWN.value):
+                copyArray = [self.maze[oldLoc[0]-1],self.maze[oldLoc[0]],self.maze[oldLoc[0]+1]]
+                index = copyArray[1].find("S")
+                stringListArray = [list(copyArray[1]),list(copyArray[2])]
+                stringListArray[0][index] = ' '
+                stringListArray[1][index] = 'S'
+                copyArray[1] = ''.join(stringListArray[0])
+                copyArray[2] = ''.join(stringListArray[1])
+                self.maze[self.agent_loc[0]] = copyArray[2]
+                self.maze[self.agent_loc[0]-1] = copyArray[1]
+                
+
+
 
     def render(self, mode='human'):
         for el in self.maze:
