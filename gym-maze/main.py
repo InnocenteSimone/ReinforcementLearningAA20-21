@@ -1,24 +1,19 @@
+import sys
+sys.path.insert(0, '../ReinforcementLearningAA20-21')
+
 from gym_maze.envs.maze_env import MazeEnv
 import gym
 import random
-from  QLearning_agent import QLearningAgent
+from QLearning_agent import QLearningAgent
 import numpy as np
 import matplotlib.pyplot as plt
 
 env = gym.make("maze-v01")
-"""
-env.render()
-done = False
-while not done:
-    print("Choose action:(0=UP, 1=DOWN, 2=LEFT, 3=RIGHT)")
-    action = input()
-    _,_,done,_ = env.step(int(action))
-    env.render()
-"""
 
-state_space_n = env.observation_space.n 
-action_space_n = env.action_space.n 
-train_episodes = 1000
+state_space_n = env.observation_space.n
+action_space_n = env.action_space.n
+
+train_episodes = 100
 max_steps = 99
 
 max_epsilon = 1.0
@@ -42,20 +37,11 @@ for episode in range(train_episodes):
     for step in range(max_steps): 
 
         #Viene utilizzata epsilon(all'interno di QLearning) per effettuare un trade-off tra Exploration e Exploitation        
-        
-        """
-        action = env.action_space.sample()  #Exploration
-        if random.uniform(0, 1) > agent.getEpsilon():
-            action = agent.getAction(state) #Exploitation
-        """
+
         action = agent.getAction(state)
-        if(action > 3):
-            print("")
         #Eseguo l'azione e osservo l'ambiente grazie alla libreria gym
         new_state, reward, done, info = env.step(action)
-        #print(new_state)
-        #Aggiorno la QTable con la formula
-        #print(state)
+
         agent.updateQTable(state,action,reward,new_state)
 
         total_training_rewards+=reward
@@ -86,11 +72,9 @@ plt.show()
 print ("Training score over time: " + str(sum(training_rewards)/train_episodes))
 
 agent.saveQTable("Maze")
-newAgent = QLearningAgent(state_space_n,action_space_n)
-newAgent.loadQTable("Maze")
 
 total_epochs, total_penalties = 0, 0
-test_episodes = 1
+test_episodes = 10
 env.reset()
 listrewards = []
 listEpisode = []
@@ -105,7 +89,7 @@ for episode in range(test_episodes):
 
     while not done:
         env.render()
-        action = newAgent.getTestAction(state)
+        action = agent.getTestAction(state)
         new_state,reward,done,info = env.step(action)
 
         if reward == -10:

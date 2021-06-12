@@ -1,17 +1,15 @@
-from QLearning_agent import QLearningAgent
 import gym
 import numpy as np
-import sys
-np.set_printoptions(threshold=sys.maxsize)
 import random
 import matplotlib.pyplot as plt
+from QLearning_agent import QLearningAgent
 
 env = gym.make('Taxi-v3')
 
 state_space_n = env.observation_space.n #500 Numero degli stati possibili del gioco
 action_space_n = env.action_space.n #6 #Numero di azioni possibili
 
-train_episodes = 5000
+train_episodes = 100000
 max_steps = 99
 
 max_epsilon = 1.0
@@ -28,20 +26,13 @@ for episode in range(train_episodes):
     #Reset dell'ambiente per ogni episodio/epoca
     state = env.reset()
     step = 0
-
     #Valore totale dei reward nell'episodio corrente
     total_training_rewards = 0
     done = False
 
     for step in range(max_steps): 
+        #Viene utilizzata epsilon(all'interno di QLearning) per effettuare un trade-off tra Exploration e Exploitation                
 
-        #Viene utilizzata epsilon(all'interno di QLearning) per effettuare un trade-off tra Exploration e Exploitation        
-        
-        """
-        action = env.action_space.sample()  #Exploration
-        if random.uniform(0, 1) > agent.getEpsilon():
-            action = agent.getAction(state) #Exploitation
-        """
         action = agent.getAction(state)
         #Eseguo l'azione e osservo l'ambiente grazie alla libreria gym
         new_state, reward, done, info = env.step(action)
@@ -57,7 +48,7 @@ for episode in range(train_episodes):
     
     #Riduzione della epsilon
     epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay_rate * episode)
-    agent.setEpsilon(epsilon)
+    agent.epsilon = epsilon
     
     training_rewards.append(total_training_rewards)
     epsilons.append(epsilon)
@@ -68,19 +59,24 @@ for episode in range(train_episodes):
 
 
 plt.plot(listEpisode,training_rewards)
+plt.title("Reward durante il traning")
 plt.xlabel("Episode")
 plt.ylabel("Rewards")
 plt.show()
 
+
 plt.plot(listEpisode,epsilons)
+plt.title("Epsilon durante il traning")
+plt.xlabel("Episode")
+plt.ylabel("Epsilon")
 plt.show()
 print ("Training score over time: " + str(sum(training_rewards)/train_episodes))
 
-#agent.saveQTable()
-#agent.loadQTable()
+agent.saveQTable("Taxi")
+#agent.loadQTable("Taxi")
 
 total_epochs, total_penalties = 0, 0
-test_episodes = 100
+test_episodes = 10
 env.reset()
 listrewards = []
 listEpisode = []
@@ -94,8 +90,8 @@ for episode in range(test_episodes):
     print("EPISODE ", episode)
 
     while not done:
-        #env.render()
-        action = agent.getAction(state)
+        env.render()
+        action = agent.getTestAction(state)
         new_state,reward,done,info = env.step(action)
 
         if reward == -10:

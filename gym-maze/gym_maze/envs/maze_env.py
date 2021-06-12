@@ -3,7 +3,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 from enum import Enum
 import numpy as np
-"""
+
 Maze = [
     "|---------|",
     "|    E    |",
@@ -14,33 +14,8 @@ Maze = [
     "|w   S  w |",
     "|---------|",
 ]
-"""
-Maze = [
-    "|---------|",
-    "|         |",
-    "|         |",
-    "| E       |",
-    "|         |",
-    "|         |",
-    "|    S    |",
-    "|---------|",
-]
 
 dictionary = {}
-
-"""
-MAP1 = [
-    "+---------+",
-    "|        G|",
-    "|         |",
-    "|         |",
-    "|wwwwwwww |",
-    "|         |",
-    "|   s     |",
-    "+---------+",
-]
-"""
-
 
 class Action(Enum):
     UP = 0
@@ -67,25 +42,23 @@ class MazeEnv(gym.Env):
         return dictionary.get(tupleVal)
     
     def __init__(self):
-        #Colonna,riga
         self.agent_loc = (6,5)
-        self.exit_loc = (3,2) #(3,1)
+        self.exit_loc =  (1,5)
         self.invalid = ['|','-','w']
 
         self.action_space = spaces.Discrete(4)
-        #self.observation_space = spaces.Box(low=0,high=4,shape=(5, 4),dtype=np.int16)
-        self.observation_space = spaces.Discrete(54) #88 posizioni nel maze, di cui 34 non possibili 88-34=54 - 7 = 47
+        self.observation_space = spaces.Discrete(37) #88 posizioni nel maze, di cui 34 non possibili 88-34=54 - 7 = 47
         self.maze = Maze.copy()
         self.__populateDict()
 
-        
 
     def reset(self):
         self.__init__()
         return self.getIndexValue(self.agent_loc)
 
     def step(self, action):
-        current_loc = self.agent_loc    #Old position
+        current_loc = self.agent_loc    #Salvataggio della vecchia posizione
+        
         if(action == Action.UP.value):
             self.agent_loc = (self.agent_loc[0]-1,self.agent_loc[1])
         elif (action == Action.DOWN.value):
@@ -97,29 +70,18 @@ class MazeEnv(gym.Env):
         
         reward = 0
         done = False
-        info = []
-        """
-        if self.agent_loc in [(self.exit_loc[0]-1,self.exit_loc[1]),(self.exit_loc[0],self.exit_loc[1]-1),(self.exit_loc[0]+1,self.exit_loc[1]),(self.exit_loc[0],self.exit_loc[1]+1)]:
-            reward = 0.2
-        """
 
+        #Se la mossa non è valida, si torna indietro
         if self.maze[self.agent_loc[0]][self.agent_loc[1]] in self.invalid:
-            # if the move is invalid, return it back
             self.agent_loc = current_loc
 
         if self.maze[self.agent_loc[0]][self.agent_loc[1]] == 'E':
             reward = 1
             done = True
 
-    
-        
-
-
         self.moveAgent(current_loc,action)
 
-       
-
-        return self.getIndexValue(self.agent_loc), reward, done, info
+        return self.getIndexValue(self.agent_loc), reward, done, None
 
     def moveAgent(self,oldLoc,action):
         if(oldLoc!=self.agent_loc):
@@ -170,6 +132,3 @@ class MazeEnv(gym.Env):
             print("")
         print("")
     
-    
-    def close(self):
-        pass
